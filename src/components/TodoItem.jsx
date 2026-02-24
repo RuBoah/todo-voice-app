@@ -1,6 +1,13 @@
 import { useState } from "react";
 
-export default function TodoItem({ todo, onToggle, onDelete, onUpdate }) {
+export default function TodoItem({
+  todo,
+  onToggle,
+  onDelete,
+  onUpdate,
+  onAddVoice,
+  onRemoveVoice,
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
 
@@ -27,6 +34,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start gap-3">
+        {/* Checkbox */}
         <input
           type="checkbox"
           checked={todo.completed}
@@ -35,8 +43,10 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }) {
           className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
         />
 
+        {/* Main content */}
         <div className="flex-1 min-w-0">
           {isEditing ? (
+            // ✅ EDIT MODE
             <div className="flex gap-2">
               <input
                 type="text"
@@ -61,6 +71,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }) {
               </button>
             </div>
           ) : (
+            // ✅ VIEW MODE
             <>
               <p
                 className={`text-gray-900 ${
@@ -89,8 +100,31 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }) {
           )}
         </div>
 
+        {/* ✅ ACTION BUTTONS (only when NOT editing) */}
         {!isEditing && (
           <div className="flex gap-2">
+            {onAddVoice && !todo.transcript && (
+              <button
+                onClick={() => onAddVoice(todo.id)}
+                className="text-purple-600 hover:text-purple-800 text-lg font-medium focus:outline-none"
+                aria-label="Add voice note"
+                title="Add voice note"
+              >
+                🎤
+              </button>
+            )}
+
+            {onRemoveVoice && todo.transcript && (
+              <button
+                onClick={() => onRemoveVoice(todo.id)}
+                className="text-orange-600 hover:text-orange-800 text-sm font-medium focus:outline-none"
+                aria-label="Remove voice note"
+                title="Remove voice note"
+              >
+                🔇
+              </button>
+            )}
+
             <button
               onClick={() => setIsEditing(true)}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium focus:outline-none"
@@ -98,6 +132,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }) {
             >
               ✏️
             </button>
+
             <button
               onClick={() => onDelete(todo.id)}
               className="text-red-600 hover:text-red-800 font-bold text-xl focus:outline-none"

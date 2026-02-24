@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import TodoService from "../services/TodoService.js";
 import LocalStorage from "../storage/LocalStorage.js";
+import TranscriptionService from "../services/TranscriptionService.js";
 
 export function useTodos() {
   const [todos, setTodos] = useState([]);
   const [error, setError] = useState(null);
+
+  const [transcriptionService] = useState(() => new TranscriptionService());
+  const [isRecording, setIsRecording] = useState(false);
 
   const [service] = useState(() => {
     const storage = new LocalStorage();
@@ -48,19 +52,60 @@ export function useTodos() {
     }
   };
 
+  const addVoiceNote = (todoId) => {
+    if (!transcriptionService.isSupported) {
+      setError(
+        "Voice Reading is not supported in this browser. Try using Chrome or Edge.",
+      );
+      return;
+    }
+
+    setIsRecording(true);
+    setError(null);
+
+    transcriptionService.startListening(
+      // On Success
+      (transcript) => {
+        try {
+          service.addTranscript(todoId, transcript);
+          setTodos(service.getAllTodos());
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setIsRecording(false);
+        }
+      },
+
+      // On Error
+      (error) => {
+        setError(error.message);
+        setIsRecording(false);
+      },
+    );
+  };
+
+  const removeVoiceNote = (todoId) => {
+    try {
+      service.removeTranscript(todoId);
+      setTodos(service.getAllTodos());
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const clearError = () => {
     setError(null);
   };
 
-    const updateTodo = (id, newTitle) => {
-      try {
-        service.updateTodo(id, newTitle);
-        setTodos(service.getAllTodos());
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
+  const updateTodo = (id, newTitle) => {
+    try {
+      service.updateTodo(id, newTitle);
+      setTodos(service.getAllTodos());
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   return {
     todos,
@@ -70,5 +115,8 @@ export function useTodos() {
     deleteTodo,
     clearError,
     updateTodo,
+    addVoiceNote,
+    removeVoiceNote,
+    isRecording,
   };
 }

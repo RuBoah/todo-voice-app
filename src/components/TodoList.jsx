@@ -1,6 +1,13 @@
 import TodoItem from "./TodoItem";
 
-export default function TodoList({ todos, onToggle, onDelete, onUpdate }) {
+export default function TodoList({
+  todos,
+  onToggle,
+  onDelete,
+  onUpdate,
+  onAddVoice,
+  onRemoveVoice,
+}) {
   if (todos.length === 0) {
     return (
       <div className="text-center py-12">
@@ -18,6 +25,8 @@ export default function TodoList({ todos, onToggle, onDelete, onUpdate }) {
           onToggle={onToggle}
           onDelete={onDelete}
           onUpdate={onUpdate}
+          onAddVoice={onAddVoice}
+          onRemoveVoice={onRemoveVoice}
         />
       ))}
     </div>

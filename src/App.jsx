@@ -4,29 +4,41 @@ import TodoList from "./components/TodoList";
 import ErrorMessage from "./components/ErrorMessage";
 
 export default function App() {
-  const { todos, error, addTodo, toggleTodo, deleteTodo, updateTodo, clearError } =
-    useTodos();
+  const {
+    todos,
+    error,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    updateTodo,
+    addVoiceNote,
+    removeVoiceNote,
+    isRecording,
+    clearError,
+  } = useTodos();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-             Todo Voice App
+            Todo Voice App
           </h1>
           <p className="text-gray-600">Manage your tasks efficiently</p>
+
+          {isRecording && (
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-full">
+              <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+              <span className="text-red-700 font-medium">Recording...</span>
+            </div>
+          )}
         </div>
 
-       
         <div className="bg-white rounded-xl shadow-xl p-6">
-       
           {error && <ErrorMessage message={error} onClose={clearError} />}
 
-         
           <TodoForm onAdd={addTodo} error={error} onClearError={clearError} />
 
-         
           <div className="flex gap-4 mb-6 text-sm text-gray-600">
             <div>
               <span className="font-semibold">{todos.length}</span> total
@@ -45,15 +57,16 @@ export default function App() {
             </div>
           </div>
 
-        
-          <TodoList 
-          todos={todos}
-           onToggle={toggleTodo} 
-           onDelete={deleteTodo} 
-           onUpdate={updateTodo} />
+          <TodoList
+            todos={todos}
+            onToggle={toggleTodo}
+            onDelete={deleteTodo}
+            onUpdate={updateTodo}
+            onAddVoice={addVoiceNote}
+            onRemoveVoice={removeVoiceNote}
+          />
         </div>
 
-      
         <div className="text-center mt-6 text-sm text-gray-600">
           <p>Built by Ruth Boahene</p>
         </div>
