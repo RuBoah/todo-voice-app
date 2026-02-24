@@ -52,6 +52,16 @@ export function useTodos() {
     setError(null);
   };
 
+    const updateTodo = (id, newTitle) => {
+      try {
+        service.updateTodo(id, newTitle);
+        setTodos(service.getAllTodos());
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
   return {
     todos,
     error,
@@ -59,5 +69,6 @@ export function useTodos() {
     toggleTodo,
     deleteTodo,
     clearError,
+    updateTodo,
   };
 }
