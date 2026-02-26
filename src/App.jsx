@@ -2,6 +2,7 @@ import { useTodos } from "./hooks/useTodos";
 import TodoForm from "./components/TodoForm";
 import TodoList from "./components/TodoList";
 import ErrorMessage from "./components/ErrorMessage";
+import { useState, useEffect } from "react";
 
 export default function App() {
   const {
@@ -16,14 +17,31 @@ export default function App() {
     isRecording,
     clearError,
   } = useTodos();
+  const [voiceSupported, setVoiceSupported] = useState(true);
+
+  useEffect(() => {
+    const supported =
+      "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+    setVoiceSupported(supported);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      {!voiceSupported && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-yellow-800 text-sm">
+            ⚠️ Voice recording is not supported in this browser. Try{" "}
+            <strong>Chrome</strong> or <strong>Edge</strong> for full
+            functionality. All other features work normally.
+          </p>
+        </div>
+      )}
+
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Todo Voice App
-          </h1>
+         <h1 className="text-4xl font-bold text-gray-900 mb-2">
+  Chatodo  
+</h1>
           <p className="text-gray-600">Manage your tasks efficiently</p>
 
           {isRecording && (
