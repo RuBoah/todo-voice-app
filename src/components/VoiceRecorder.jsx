@@ -1,38 +1,35 @@
 import { useState, useEffect } from "react";
 
-export default function VoiceRecorder({ onTranscript, onError, disabled }) {
-  const [isListening, setIsListening] = useState(false);
-
+/**
+ * VoiceRecorder Component
+ * Microphone button for voice recording
+ */
+export default function VoiceRecorder({
+  onTranscript,
+  onError,
+  disabled,
+  isRecording,
+}) {
   const handleClick = () => {
-    if (disabled) return;
+    if (disabled || isRecording) return;
 
-    if (isListening) {
-      setIsListening(false);
-    } else {
-      setIsListening(true);
-      onTranscript();
-    }
+    // Trigger recording
+    onTranscript();
   };
-
-  useEffect(() => {
-    if (disabled) {
-      setIsListening(false);
-    }
-  }, [disabled]);
 
   return (
     <button
       onClick={handleClick}
-      disabled={disabled}
+      disabled={disabled || isRecording}
       className={`p-3 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-        isListening
-          ? "bg-red-500 hover:bg-red-600 focus:ring-red-500 animate-pulse"
+        isRecording
+          ? "bg-red-500 hover:bg-red-600 focus:ring-red-500 animate-pulse cursor-wait"
           : "bg-blue-500 hover:bg-blue-600 focus:ring-blue-500"
-      } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-      aria-label={isListening ? "Stop recording" : "Start recording"}
-      title={isListening ? "Recording..." : "Click to record voice note"}
+      } ${disabled || isRecording ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+      aria-label={isRecording ? "Recording..." : "Start recording"}
+      title={isRecording ? "Recording..." : "Click to record voice note"}
     >
-      <span className="text-2xl">{isListening ? "⏹️" : "🎤"}</span>
+      <span className="text-2xl">{isRecording ? "⏹️" : "🎤"}</span>
     </button>
   );
 }

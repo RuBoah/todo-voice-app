@@ -2,12 +2,14 @@ class TranscriptionService {
   constructor() {
     this.recognition = null;
     this.isListening = false;
-
     this.isSupported = this.checkSupport();
   }
 
   checkSupport() {
-    return "webkitSpeechRecognition" in window || "SpeechRecognition" in window;
+    return (
+      typeof window !== "undefined" &&
+      ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+    );
   }
 
   initialize() {
@@ -17,6 +19,7 @@ class TranscriptionService {
 
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
+
     this.recognition = new SpeechRecognition();
 
     this.recognition.continuous = false;
@@ -27,8 +30,8 @@ class TranscriptionService {
 
   /**
    * Start listening
-   * @param {Function} onResult - Callback when transcription complete
-   * @param {Function} onError - Callback on error
+   * @param {Function} onResult
+   * @param {Function} onError
    */
   startListening(onResult, onError) {
     if (!this.isSupported) {
@@ -36,10 +39,17 @@ class TranscriptionService {
       return;
     }
 
+    // Prevent multiple simultaneous recordings
+    if (this.isListening) {
+      console.warn("Already listening, ignoring start request");
+      return;
+    }
+
     if (!this.recognition) {
       this.initialize();
     }
 
+    // Set up event handlers
     this.recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       this.isListening = false;
@@ -49,6 +59,12 @@ class TranscriptionService {
     this.recognition.onerror = (event) => {
       this.isListening = false;
       let errorMessage = "Speech recognition error";
+
+      // Ignore abort errors (user cancelled)
+      if (event.error === "aborted") {
+        console.log("Recognition aborted by user");
+        return;
+      }
 
       switch (event.error) {
         case "no-speech":
@@ -74,22 +90,50 @@ class TranscriptionService {
       this.isListening = false;
     };
 
+    // Start recognition with error handling
     try {
       this.recognition.start();
       this.isListening = true;
     } catch (error) {
-      this.isListening = false;
-      onError(error);
+      // Already started error
+      if (error.name === "InvalidStateError") {
+        console.warn("Recognition already started, stopping and restarting");
+        this.stopListening();
+
+        // Try again after brief delay
+        setTimeout(() => {
+          try {
+            this.recognition.start();
+            this.isListening = true;
+          } catch (retryError) {
+            this.isListening = false;
+            onError(retryError);
+          }
+        }, 100);
+      } else {
+        this.isListening = false;
+        onError(error);
+      }
     }
   }
 
+  /**
+   * Stop listening
+   */
   stopListening() {
-    if (this.recognition && this.isListening) {
-      this.recognition.stop();
+    if (this.recognition) {
+      try {
+        this.recognition.stop();
+      } catch (e) {
+        console.warn("Stop error:", e);
+      }
       this.isListening = false;
     }
   }
 
+  /**
+   * Get listening state
+   */
   getIsListening() {
     return this.isListening;
   }

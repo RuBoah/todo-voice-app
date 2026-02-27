@@ -55,8 +55,14 @@ export function useTodos() {
   const addVoiceNote = (todoId) => {
     if (!transcriptionService.isSupported) {
       setError(
-        "Voice Reading is not supported in this browser. Try using Chrome or Edge.",
+        "Voice recording is not supported in this browser. Try Chrome or Edge.",
       );
+      return;
+    }
+
+    // Prevent starting if already recording
+    if (isRecording) {
+      console.log("Already recording, ignoring request");
       return;
     }
 
@@ -64,19 +70,19 @@ export function useTodos() {
     setError(null);
 
     transcriptionService.startListening(
-      // On Success
+      // On success
       (transcript) => {
         try {
           service.addTranscript(todoId, transcript);
           setTodos(service.getAllTodos());
+          setIsRecording(false);
+          setError(null);
         } catch (err) {
           setError(err.message);
-        } finally {
           setIsRecording(false);
         }
       },
-
-      // On Error
+      // On error
       (error) => {
         setError(error.message);
         setIsRecording(false);
